@@ -4,7 +4,7 @@ using JSON3
 include("src/ISO13773_M.jl")
 
 # Bring our logic functions into scope
-using .M13773
+using .ISO13773
 
 # --- API ENDPOINT 1: Calculate Frequencies ---
 # Responds to GET requests like:
@@ -19,7 +19,7 @@ route("/calculate_frequencies", method = GET) do
         beta = parse(Float64, params(:beta, "15.0"))
 
         # Call our logic function
-        freqs = M13773.calculate_all_frequencies(rpm, n_b, d_b, d_p, beta)
+        freqs = ISO13773.calculate_all_frequencies(rpm, n_b, d_b, d_p, beta)
         
         # Return the result as JSON
         return json(freqs)

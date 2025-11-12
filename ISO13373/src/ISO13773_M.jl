@@ -1,4 +1,4 @@
-module M13773
+module ISO13773
 
 using DSP
 using FFTW
@@ -95,4 +95,4 @@ function perform_envelope_analysis(t, signal, fs)
     return fft_freqs, env_fft_mag
 end
 
-end # module M13773
+end # module ISO13373
