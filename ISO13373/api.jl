@@ -91,5 +91,5 @@ route("/analyze/upload", method = POST) do
     end
 end
 
-println("Starting ISO 13373 Analyzer on port 8000...")
+println("Starting ISO 13773 Analyzer on port 8000...")
 up(8000, "0.0.0.0", async=false)
