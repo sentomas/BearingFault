@@ -8,12 +8,13 @@ WORKDIR /app
 COPY Project.toml .
 COPY Manifest.toml .
 
-# 4. Install all the Julia packages *for the current project*
+# 4. Copy all your application files
+COPY . .
+# 5. Install all the Julia packages *for the current project*
 # THIS IS THE FIX: Added --project=.
 RUN julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
-# 5. Copy all your application files
-COPY . .
+
 
 # 6. Expose the port your Genie server runs on
 EXPOSE 8000
