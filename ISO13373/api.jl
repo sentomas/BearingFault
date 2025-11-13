@@ -2,8 +2,10 @@
 ENV["OMP_PROC_BIND"] = "false"
 
 using Genie, Genie.Renderer.Json, Genie.Requests, Genie.Renderer.Html
+# Use the module file you have
 include("src/ISO13773_M.jl") 
-using .ISO13773
+# Use the module name defined in that file
+using .ISO13773 
 
 cors_headers = Dict(
     "Access-Control-Allow-Origin" => "*",
@@ -33,10 +35,12 @@ end
 
 route("/analyze/upload", method = POST) do
     try
+        # FIX: Use the correct function `filespayload()`
         if isempty(Genie.Requests.filespayload())
              return Genie.Renderer.Json.json(Dict("error" => "No file uploaded."), status = 400)
         end
         
+        # FIX: Use the correct function `filespayload()`
         file = first(Genie.Requests.filespayload())[2]
         
         rpm = parse(Float64, string(Genie.Requests.payload(:rpm, "1780")))
@@ -57,7 +61,7 @@ route("/analyze/upload", method = POST) do
         # 3. Slice Time Waveform (Max 2000 points)
         max_points = 2000
         
-        # FIX: Use Base.div here to resolve conflict
+        # Use Base.div to avoid function name conflicts
         step = max(1, Base.div(length(t), max_points))
         
         t_view = collect(t[1:step:end])
@@ -87,5 +91,5 @@ route("/analyze/upload", method = POST) do
     end
 end
 
-println("Starting ISO 13773 Analyzer on port 8000...")
+println("Starting ISO 13373 Analyzer on port 8000...")
 up(8000, "0.0.0.0", async=false)

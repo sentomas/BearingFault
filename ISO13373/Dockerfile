@@ -7,7 +7,8 @@ WORKDIR /app
 # 3. Copy the Project.toml file FIRST
 # This lets Docker cache the installed packages, making future builds faster
 COPY Project.toml .
-
+# We also copy Manifest.toml if it exists, for reproducible builds
+COPY Manifest.toml .
 # ...
 # 4. Install all the Julia packages from Project.toml
 # RUN julia -e 'using Pkg; Pkg.add(url="https://github.com/GenieFramework/Genie.jl", rev="v6.3.0"); Pkg.instantiate()'
