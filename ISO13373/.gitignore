@@ -33,7 +33,7 @@ Desktop.ini
 *.png
 *.svg
 *.pdf
-*.html
+# *.html
 
 # --- Julia Local Preferences ---
 # Keeps local path configurations out of the repo
