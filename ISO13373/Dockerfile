@@ -9,7 +9,8 @@ WORKDIR /app
 COPY Project.toml .
 
 # 4. Install all the Julia packages from Project.toml
-RUN julia -e 'using Pkg; Pkg.add(url="https://github.com/GenieFramework/Genie.jl", rev="v6.3.0"); Pkg.instantiate()'
+# RUN julia -e 'using Pkg; Pkg.add(url="https://github.com/GenieFramework/Genie.jl", rev="v6.3.0"); Pkg.instantiate()'
+Pkg.instantiate()
 
 # 5. Copy all your application files into the container
 # This includes api.jl, index.html, and the src/ folder

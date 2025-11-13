@@ -73,6 +73,7 @@
                 </div>
             </form>
             
+            <!-- Results Container -->
             <div id="results-container" class="bg-white p-6 rounded-lg shadow-sm border border-gray-200" style="display: none;">
                 <h3 class="text-xl font-semibold text-gray-800 border-b pb-3">Analysis Results</h3>
                 
@@ -86,6 +87,7 @@
                     <div id="plot-spectrum" class="w-full h-[500px] border border-gray-100 rounded"></div>
                 </div>
 
+                <!-- Info Cards -->
                 <div class="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-center">
                     <div class="bg-blue-50 p-3 rounded-md border border-blue-100">
                         <div class="text-xs font-medium text-gray-500">Shaft (1X)</div>
@@ -115,12 +117,18 @@
             </div>
         </div>
 
+        <!-- Message/Loading Overlay -->
         <div id="message-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50" style="display: none;">
-            <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full text-center">
+            <div classs="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full text-center">
                 <div id="message-loading" class="space-y-4">
-                    <p class="text-lg font-medium text-gray-700">Processing...</p>
+                    <!-- SVG Spinner -->
+                    <svg class="animate-spin h-12 w-12 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class"opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="text-lg font-medium text-white">Processing... Please wait.</p>
                 </div>
-                <div id="message-error" style="display: none;">
+                <div id="message-error" class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full text-center" style="display: none;">
                     <h3 class="text-xl font-bold text-red-600 mb-4">Error</h3>
                     <p id="error-text" class="text-sm text-gray-600 text-left"></p>
                     <button onclick="document.getElementById('message-overlay').style.display='none'" class="mt-6 w-full py-2 px-4 bg-red-600 text-white rounded">Close</button>
@@ -130,8 +138,17 @@
     </main>
 
     <script>
-        //const API_BASE_URL = 'http://localhost:8000';
-        const API_BASE_URL = 'https://github.com/sentomas/BearingFault';
+        // --- IMPORTANT ---
+        // This MUST point to your running API (either local or deployed)
+        const API_BASE_URL = 'http://localhost:8000'; // For local testing
+        //const API_BASE_URL = 'https://github.com/sentomas/BearingFault'; // This is WRONG, see comment below
+        
+        // --- NOTE ---
+        // 'https://github.com/sentomas/BearingFault' is NOT a running API server.
+        // It is a code repository. You must run your 'api.jl' or 'main.py'
+        // on a server (like Render.com or locally) and put THAT URL here.
+        // For local testing, use 'http://localhost:8000' and run 'julia api.jl'
+
         const analysisForm = document.getElementById('analysis-form');
         const resultsContainer = document.getElementById('results-container');
         const messageOverlay = document.getElementById('message-overlay');
@@ -153,7 +170,10 @@
             e.preventDefault();
             resultsContainer.style.display = 'none';
             const fileInput = document.getElementById('file');
-            if (fileInput.files.length === 0) { alert('Select a file'); return; }
+            if (fileInput.files.length === 0) { 
+                alert('Please select a CSV file'); 
+                return; 
+            }
 
             const formData = new FormData();
             const params = getFormData();
@@ -176,7 +196,7 @@
             } catch (err) {
                 messageLoading.style.display = 'none';
                 messageError.style.display = 'block';
-                errorText.textContent = err.message;
+                errorText.textContent = err.message + "\n\n(Is your API server running at " + API_BASE_URL + "?)";
             }
         });
 
@@ -203,18 +223,30 @@
             }, {responsive: true});
 
             // 2. Spectrum Plot
+            // --- UPDATED PLOT LAYOUT ---
             Plotly.newPlot('plot-spectrum', [{
                 x: spectrum.frequencies, y: spectrum.magnitudes, type: 'scatter', mode: 'lines', line: { color: '#1f2937' }
             }], {
-                xaxis: { title: 'Frequency (Hz)', range: [0, freqs.bpfo * 5] },
+                xaxis: { title: 'Frequency (Hz)', range: [0, freqs.bpfi * 1.5] }, // Zoom to 1.5x BPFI
                 yaxis: { title: 'Magnitude' },
                 shapes: [
-                    { type: 'line', x0: freqs.bpfo, x1: freqs.bpfo, y0: 0, y1: 1, yref: 'paper', line: { color: 'red', dash: 'dash' } },
-                    { type: 'line', x0: freqs.bpfi, x1: freqs.bpfi, y0: 0, y1: 1, yref: 'paper', line: { color: 'orange', dash: 'dash' } }
+                    // Shaft (1X) - Blue
+                    { type: 'line', x0: freqs.f_r, x1: freqs.f_r, y0: 0, y1: 1, yref: 'paper', line: { color: 'blue', dash: 'dashdot', width: 1 } },
+                    // BPFO - Red
+                    { type: 'line', x0: freqs.bpfo, x1: freqs.bpfo, y0: 0, y1: 1, yref: 'paper', line: { color: 'red', dash: 'dash', width: 2 } },
+                    // BPFI - Orange
+                    { type: 'line', x0: freqs.bpfi, x1: freqs.bpfi, y0: 0, y1: 1, yref: 'paper', line: { color: 'orange', dash: 'dash', width: 2 } },
+                    // BSF - Purple
+                    { type: 'line', x0: freqs.bsf, x1: freqs.bsf, y0: 0, y1: 1, yref: 'paper', line: { color: 'purple', dash: 'dot', width: 1.5 } },
+                    // FTF - Teal
+                    { type: 'line', x0: freqs.ftf, x1: freqs.ftf, y0: 0, y1: 1, yref: 'paper', line: { color: 'teal', dash: 'dot', width: 1 } }
                 ],
                 annotations: [
-                    { x: freqs.bpfo, y: 1, yref: 'paper', text: 'BPFO', showarrow: false, font: {color: 'red'} },
-                    { x: freqs.bpfi, y: 0.9, yref: 'paper', text: 'BPFI', showarrow: false, font: {color: 'orange'} }
+                    { x: freqs.f_r, y: 1.0, yref: 'paper', text: '1X', showarrow: false, yanchor: 'top', font: {color: 'blue'} },
+                    { x: freqs.bpfo, y: 1.0, yref: 'paper', text: 'BPFO', showarrow: false, yanchor: 'top', font: {color: 'red'} },
+                    { x: freqs.bpfi, y: 0.95, yref: 'paper', text: 'BPFI', showarrow: false, yanchor: 'top', font: {color: 'orange'} },
+                    { x: freqs.bsf, y: 0.90, yref: 'paper', text: 'BSF', showarrow: false, yanchor: 'top', font: {color: 'purple'} },
+                    { x: freqs.ftf, y: 0.85, yref: 'paper', text: 'FTF', showarrow: false, yanchor: 'top', font: {color: 'teal'} }
                 ]
             }, {responsive: true});
         }
