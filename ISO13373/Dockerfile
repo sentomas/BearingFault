@@ -4,20 +4,19 @@ FROM julia:1.10
 # 2. Set the working directory inside the container
 WORKDIR /app
 
-# 3. Copy the Project/Manifest files
-COPY Project.toml .
-COPY Manifest.toml .
-
-# 4. Copy all your application files
+# 3. Copy all application files (including your local Manifest.toml)
 COPY . .
-# 5. Install all the Julia packages *for the current project*
-# THIS IS THE FIX: Added --project=.
-RUN julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
+# 4. DELETE the local Manifest.toml
+# This forces Julia to resolve dependencies fresh for the Docker environment,
+# fixing the "failed to find source" path errors.
+RUN rm -f Manifest.toml
 
+# 5. Install/Instantiate
+RUN julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
-# 6. Expose the port your Genie server runs on
+# 6. Expose the port
 EXPOSE 8000
 
-# 7. The command to run when the server starts
+# 7. Run command
 CMD ["julia", "--project=.", "api.jl"]
