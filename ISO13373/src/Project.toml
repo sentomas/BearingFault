@@ -1,0 +1,11 @@
+[name] = "ISO13773"
+version = "0.1.0"
+authors = ["Serin Thomas"]
+
+[deps]
+Genie = "c46f51b8-d74f-5f7b-9609-20b57e0eac19"
+DSP = "717857b8-e6f2-59f4-912a-facae28c65f9"
+FFTW = "7a134a51-82d9-5e19-92c2-b3648e1b6c7a"
+Statistics = "10745b16-79ce-11e8-11f9-5aff3c892869"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
